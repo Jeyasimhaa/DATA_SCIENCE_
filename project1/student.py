@@ -22,8 +22,4 @@ features = np.array([[study_hours,attendance,previous_score,
 if st.button("Predict Final Score"): 
     features_scaled = scaler.transform(features)
     prediction = model.predict(features_scaled) 
-<<<<<<< HEAD
     st.success(f"Predicted Final Score: {prediction[0]:.2f}") 
-=======
-    st.success(f"Predicted Final Score: {prediction[0]:.2f}") 
->>>>>>> c69f5bf53f87dcfa1d2a609f4fcd74df26b59f2f
