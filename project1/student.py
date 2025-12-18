@@ -4,7 +4,7 @@ import numpy as np
 import os 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
-model = pickle.load(open(os.path.join(BASE_DIR, "student_final_model.pk1"), "rb"))
+model = pickle.load(open(os.path.join(BASE_DIR, "student_final_model.pkl"), "rb"))
 scaler = pickle.load(open(os.path.join(BASE_DIR, "scaler.pkl"), "rb")) 
 
 st.title(" Y Student Final Score Prediction App")  
