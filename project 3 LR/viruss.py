@@ -15,7 +15,7 @@ uploaded_file = st.file_uploader("C:\Users\rjey0\Downloads\practise\project 3 LR
 
 if uploaded_file is not None:
     # Load data
-    df = pd.read_csv("C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv)
+    df = pd.read_csv("C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
 
     st.subheader("📄 Dataset Preview")
     st.dataframe(df.head())
