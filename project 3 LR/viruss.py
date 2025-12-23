@@ -11,11 +11,11 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 st.title("📊 Data Science / ML Streamlit App")
 
 # File upload
-uploaded_file = st.file_uploader("C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
+uploaded_file = st.file_uploader(r"C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
 
 if uploaded_file is not None:
     # Load data
-    df = pd.read_csv("C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
+    df = pd.read_csv(r"C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
 
     st.subheader("📄 Dataset Preview")
     st.dataframe(df.head())
