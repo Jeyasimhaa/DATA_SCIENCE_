@@ -1,54 +1,44 @@
 import streamlit as st
-import pickle
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# ---------------------------------
-# Load the trained model & scaler
-# ---------------------------------
-with open("logistic_model.pkl", "rb") as f:
-    model = pickle.load(f)
+# Page config
+st.set_page_config(page_title="My Streamlit App", layout="wide")
 
-with open("scaler.pkl", "rb") as f:
-    scaler = pickle.load(f)
+# Title
+st.title("📊 Data Science / ML Streamlit App")
 
-# ---------------------------------
-# Streamlit UI
-# ---------------------------------
-st.set_page_config(page_title="Logistic Regression App", layout="centered")
+# File upload
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
-st.title("Customer Purchase Prediction")
-st.write("Logistic Regression Deployment using Streamlit")
+if uploaded_file is not None:
+    # Load data
+    df = pd.read_csv(uploaded_file)
 
-# ---------------------------------
-# User Inputs
-# ---------------------------------
-age = st.number_input(
-    "Enter Age",
-    min_value=1,
-    max_value=100,
-    value=30
-)
+    st.subheader("📄 Dataset Preview")
+    st.dataframe(df.head())
 
-salary = st.number_input(
-    "Enter Estimated Salary",
-    min_value=1000,
-    max_value=200000,
-    value=50000
-)
+    st.subheader("📌 Dataset Info")
+    st.write(df.describe())
 
-# ---------------------------------
-# Prediction
-# ---------------------------------
-if st.button("Predict"):
+    # Select target column
+    target = st.selectbox("Select Target Column", df.columns)
 
-    input_data = np.array([[age, salary]])
+    # Feature selection
+    X = df.drop(columns=[target])
+    y = df[target]
 
-    # Apply same scaling used during training
-    input_scaled = scaler.transform(input_data)
+    st.subheader("🔍 Feature Columns")
+    st.write(X.columns.tolist())
 
-    prediction = model.predict(input_scaled)
+    # Correlation heatmap
+    st.subheader("📈 Correlation Heatmap")
+    fig, ax = plt.subplots()
+    sns.heatmap(df.corr(), annot=True, cmap="coolwarm", ax=ax)
+    st.pyplot(fig)
 
-    if prediction[0] == 1:
-        st.success("✅ Customer WILL purchase")
-    else:
-        st.error("❌ Customer will NOT purchase")
+    st.success("Data loaded successfully ✅")
+else:
+    st.warning("Please upload a CSV file to continue")
