@@ -20,7 +20,7 @@ st.write("This app uses **Naive Bayes + SelectKBest** to predict passenger survi
 # -------------------------------------------------
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/titanic.csv")
+    return pd.read_csv("titanic.csv")
 
 df = load_data()
 
