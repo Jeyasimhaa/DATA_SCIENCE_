@@ -8,18 +8,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # -------------------------------------------------
-# Page Config
+# App Title
 # -------------------------------------------------
-st.set_page_config(
-    page_title="Titanic Survival Prediction",
-    layout="centered"
-)
+st.set_page_config(page_title="Titanic Survival Prediction", layout="centered")
 
 st.title("🚢 Titanic Survival Prediction (Naive Bayes)")
 st.write("This app uses **Naive Bayes + SelectKBest** to predict passenger survival.")
 
 # -------------------------------------------------
-# Load Dataset (Streamlit Cloud Safe)
+# Load Dataset (IMPORTANT: relative path only)
 # -------------------------------------------------
 @st.cache_data
 def load_data():
@@ -33,33 +30,31 @@ st.dataframe(df.head())
 # -------------------------------------------------
 # Data Preprocessing
 # -------------------------------------------------
-# Handle missing values
 df["age"] = df["age"].fillna(df["age"].mean())
 df["fare"] = df["fare"].fillna(df["fare"].mean())
 df["embarked"] = df["embarked"].fillna(df["embarked"].mode()[0])
 
-# Drop unnecessary columns
 df = df.drop(["passenger_id", "name", "ticket", "cabin"], axis=1)
 
-# Encode categorical features
+# Encode categorical columns
 le_sex = LabelEncoder()
 le_embarked = LabelEncoder()
 
-df["sex"] = le_sex.fit_transform(df["sex"])
-df["embarked"] = le_embarked.fit_transform(df["embarked"])
+df["sex"] = le_sex.fit_transform(df["sex"])          # male/female
+df["embarked"] = le_embarked.fit_transform(df["embarked"])  # S/C/Q
 
-# Features and target
+# Split features and target
 X = df.drop("survived", axis=1)
 y = df["survived"]
 
 # -------------------------------------------------
-# Scaling (Required for chi2)
+# Scaling (required for chi2)
 # -------------------------------------------------
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 
 # -------------------------------------------------
-# Feature Selection
+# SelectKBest
 # -------------------------------------------------
 selector = SelectKBest(score_func=chi2, k=5)
 X_selected = selector.fit_transform(X_scaled, y)
@@ -87,11 +82,15 @@ st.success(f"🎯 Model Accuracy: {accuracy:.2f}")
 st.subheader("🧍 Enter Passenger Details")
 
 pclass = st.selectbox("Passenger Class", [1, 2, 3])
-sex = st.selectbox("Sex", ["Male", "Female"])
+
+# IMPORTANT: use lowercase (same as dataset)
+sex = st.selectbox("Sex", ["male", "female"])
+
 age = st.number_input("Age", min_value=0, max_value=100, value=25)
-sibsp = st.number_input("Siblings / Spouses aboard", 0, 10, 0)
-parch = st.number_input("Parents / Children aboard", 0, 10, 0)
+sibsp = st.number_input("Siblings / Spouses aboard", min_value=0, max_value=10, value=0)
+parch = st.number_input("Parents / Children aboard", min_value=0, max_value=10, value=0)
 fare = st.number_input("Fare", min_value=0.0, value=10.0)
+
 embarked = st.selectbox("Embarked Port", ["S", "C", "Q"])
 
 # Encode inputs
@@ -103,17 +102,19 @@ input_df = pd.DataFrame(
     columns=X.columns
 )
 
-# Scale and select features
+# Scale + Select
 input_scaled = scaler.transform(input_df)
 input_selected = selector.transform(input_scaled)
 
 # -------------------------------------------------
 # Prediction
 # -------------------------------------------------
-if st.button("🚀 Predict Survival"):
+if st.button("Predict Survival"):
     prediction = model.predict(input_selected)[0]
 
     if prediction == 1:
-        st.success("✅ Passenger **Survived**")
+        st.success("✅ Passenger Survived")
     else:
-        st.error("❌ Passenger **Did Not Survive**")
+        st.error("❌ Passenger Did Not Survive")
+
+
