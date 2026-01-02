@@ -3,6 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+import streamlit as st
+st.write("App started")
+
+import matplotlib.pyplot as plt
+st.write("Matplotlib loaded")
+
+
 st.set_page_config(page_title="My Streamlit App", layout="wide")
 st.title("📊 Data Science / ML Streamlit App")
 
