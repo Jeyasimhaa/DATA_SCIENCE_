@@ -1,39 +1,65 @@
+
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import streamlit as st
-st.write("App started")
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report
 
-import matplotlib.pyplot as plt
-st.write("Matplotlib loaded")
+st.set_page_config(page_title="Heart Disease Prediction", layout="wide")
+st.title("❤️ Framingham Heart Disease Prediction")
 
+# Load dataset (RELATIVE PATH)
+@st.cache_data
+def load_data():
+    return pd.read_csv("framingham_heart_disease.csv")
 
-st.set_page_config(page_title="My Streamlit App", layout="wide")
-st.title("📊 Data Science / ML Streamlit App")
-
-df = pd.read_csv(
-    r"C:\Users\rjey0\Downloads\practise\project3LR\framingham_heart_disease.csv"
-)
+df = load_data()
 
 st.subheader("📄 Dataset Preview")
 st.dataframe(df.head())
 
-st.subheader("📌 Dataset Info")
+st.subheader("📊 Dataset Info")
 st.write(df.describe())
 
-target = st.selectbox("Select Target Column", df.columns)
+# Handle missing values
+df = df.drop(columns=["education"])
 
-X = df.drop(columns=[target])
-y = df[target]
+cols = ['cigsPerDay', 'BPMeds', 'totChol', 'BMI', 'glucose', 'heartRate']
+df[cols] = df[cols].fillna(df[cols].mean())
 
-st.subheader("🔍 Feature Columns")
-st.write(X.columns.tolist())
+st.success("Missing values handled ✅")
 
-st.subheader("📈 Correlation Heatmap")
+# Split data
+X = df.drop(columns=["TenYearCHD"])
+y = df["TenYearCHD"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Scale
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Train model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Evaluation
+y_pred = model.predict(X_test)
+
+st.subheader("📈 Model Performance")
+st.write("Accuracy:", accuracy_score(y_test, y_pred))
+st.text(classification_report(y_test, y_pred))
+
+# Correlation heatmap
+st.subheader("🔥 Correlation Heatmap")
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.heatmap(df.corr(), annot=True, cmap="coolwarm", ax=ax)
+sns.heatmap(df.corr(), cmap="coolwarm", ax=ax)
 st.pyplot(fig)
-
-st.success("Data loaded successfully ✅")
