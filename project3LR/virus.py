@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -11,11 +10,11 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 st.title("📊 Data Science / ML Streamlit App")
 
 # File upload
-uploaded_file = st.file_uploader(r"C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    # Load data
-    df = pd.read_csv(r"C:\Users\rjey0\Downloads\practise\project 3 LR\framingham_heart_disease.csv")
+    # ✅ READ THE UPLOADED FILE
+    df = pd.read_csv(uploaded_file)
 
     st.subheader("📄 Dataset Preview")
     st.dataframe(df.head())
@@ -35,7 +34,7 @@ if uploaded_file is not None:
 
     # Correlation heatmap
     st.subheader("📈 Correlation Heatmap")
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 6))
     sns.heatmap(df.corr(), annot=True, cmap="coolwarm", ax=ax)
     st.pyplot(fig)
 
