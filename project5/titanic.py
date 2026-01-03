@@ -11,13 +11,13 @@ st.set_page_config(
 
 st.title("🚢 Titanic Survival Prediction App")
 st.write("Enter passenger details to predict survival")
-st.write("Files in app directory:", os.listdir(BASE_DIR))
 
-# ---------------- LOAD MODEL SAFELY ----------------
-MODEL_PATH = "titanic_rf_model.pkl"
+# ---------------- LOAD MODEL (CLOUD + LOCAL SAFE) ----------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "titanic_rf_model.pkl")
 
 if not os.path.exists(MODEL_PATH):
-    st.error("❌ Model file 'titanic_rf_model.pkl' not found. Upload it to the same folder.")
+    st.error("❌ Model file 'titanic_rf_model.pkl' not found. Please upload it to the app directory.")
     st.stop()
 
 with open(MODEL_PATH, "rb") as f:
@@ -31,7 +31,7 @@ sibsp = st.number_input("Siblings / Spouses aboard", min_value=0, max_value=10, 
 parch = st.number_input("Parents / Children aboard", min_value=0, max_value=10, value=0)
 fare = st.number_input("Fare", min_value=0.0, value=32.0)
 
-# ---------------- ENCODE SEX (NO ENCODER FILE NEEDED) ----------------
+# ---------------- ENCODE FEATURES ----------------
 sex_encoded = 1 if sex == "male" else 0
 
 # ---------------- INPUT DATAFRAME ----------------
@@ -53,3 +53,4 @@ if st.button("Predict Survival"):
         st.success(f"✅ Passenger is likely to SURVIVE (Confidence: {probability:.2f})")
     else:
         st.error(f"❌ Passenger is likely to NOT SURVIVE (Confidence: {probability:.2f})")
+
