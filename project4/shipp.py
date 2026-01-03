@@ -6,6 +6,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from pathlib import Path
 
 # -------------------------------------------------
 # App Title
@@ -18,11 +19,10 @@ st.write("This app uses **Naive Bayes + SelectKBest** to predict passenger survi
 # -------------------------------------------------
 # Load Dataset (IMPORTANT: relative path only)
 # -------------------------------------------------
-@st.cache_data
-def load_data():
-    return pd.read_csv("titanic.csv")
+BASE_DIR = Path(__file__).parent
+DATA_PATH = BASE_DIR / "titanic.csv"
 
-df = load_data()
+pd.read_csv(DATA_PATH)
 
 st.subheader("📊 Dataset Preview")
 st.dataframe(df.head())
