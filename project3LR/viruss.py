@@ -1,16 +1,15 @@
 import streamlit as st
 import numpy as np
 import pickle
+import os
 
-# -----------------------------
-# Load model and scaler
-# -----------------------------
-with open("logistic_model.pkl", "rb") as f:
+BASE_DIR = os.path.dirname(__file__)
+
+with open(os.path.join(BASE_DIR, "logistic_model.pkl"), "rb") as f:
     model = pickle.load(f)
 
-with open("scaler.pkl", "rb") as f:
+with open(os.path.join(BASE_DIR, "scaler.pkl"), "rb") as f:
     scaler = pickle.load(f)
-
 # -----------------------------
 # App UI
 # -----------------------------
