@@ -11,6 +11,7 @@ st.set_page_config(
 
 st.title("🚢 Titanic Survival Prediction App")
 st.write("Enter passenger details to predict survival")
+st.write("Files in app directory:", os.listdir(BASE_DIR))
 
 # ---------------- LOAD MODEL SAFELY ----------------
 MODEL_PATH = "titanic_rf_model.pkl"
