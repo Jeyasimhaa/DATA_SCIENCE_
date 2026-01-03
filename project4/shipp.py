@@ -22,7 +22,7 @@ st.write("This app uses **Naive Bayes + SelectKBest** to predict passenger survi
 BASE_DIR = Path(__file__).parent
 DATA_PATH = BASE_DIR / "titanic.csv"
 
-pd.read_csv(DATA_PATH)
+df = pd.read_csv(DATA_PATH)
 
 st.subheader("📊 Dataset Preview")
 st.dataframe(df.head())
