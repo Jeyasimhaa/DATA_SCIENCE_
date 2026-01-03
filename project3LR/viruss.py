@@ -1,65 +1,76 @@
-
 import streamlit as st
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pickle
 
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, classification_report
+# -----------------------------
+# Load model and scaler
+# -----------------------------
+with open("logistic_model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-st.set_page_config(page_title="Heart Disease Prediction", layout="wide")
-st.title("❤️ Framingham Heart Disease Prediction")
+with open("scaler.pkl", "rb") as f:
+    scaler = pickle.load(f)
 
-# Load dataset (RELATIVE PATH)
-@st.cache_data
-def load_data():
-    return pd.read_csv("framingham_heart_disease.csv")
+# -----------------------------
+# App UI
+# -----------------------------
+st.set_page_config(page_title="Heart Disease Prediction")
+st.title("❤️ Heart Disease Prediction")
+st.write("Predict 10-year risk of heart disease")
 
-df = load_data()
+st.divider()
 
-st.subheader("📄 Dataset Preview")
-st.dataframe(df.head())
+# -----------------------------
+# User Inputs (ALL 14 FEATURES)
+# -----------------------------
+age = st.number_input("Age", 20, 100, 45)
 
-st.subheader("📊 Dataset Info")
-st.write(df.describe())
+sex = st.selectbox("Sex", ["Male", "Female"])
+currentSmoker = st.selectbox("Current Smoker", ["Yes", "No"])
+cigsPerDay = st.number_input("Cigarettes Per Day", 0, 70, 0)
 
-# Handle missing values
-df = df.drop(columns=["education"])
+BPMeds = st.selectbox("On BP Medication", ["Yes", "No"])
+prevalentStroke = st.selectbox("History of Stroke", ["Yes", "No"])
+prevalentHyp = st.selectbox("Hypertension", ["Yes", "No"])
+diabetes = st.selectbox("Diabetes", ["Yes", "No"])
 
-cols = ['cigsPerDay', 'BPMeds', 'totChol', 'BMI', 'glucose', 'heartRate']
-df[cols] = df[cols].fillna(df[cols].mean())
+totChol = st.number_input("Total Cholesterol", value=200)
+sysBP = st.number_input("Systolic BP", value=120)
+diaBP = st.number_input("Diastolic BP", value=80)
+BMI = st.number_input("BMI", value=25.0)
+heartRate = st.number_input("Heart Rate", value=75)
+glucose = st.number_input("Glucose", value=90)
 
-st.success("Missing values handled ✅")
+# -----------------------------
+# Convert categorical → numeric
+# -----------------------------
+sex = 1 if sex == "Male" else 0
+currentSmoker = 1 if currentSmoker == "Yes" else 0
+BPMeds = 1 if BPMeds == "Yes" else 0
+prevalentStroke = 1 if prevalentStroke == "Yes" else 0
+prevalentHyp = 1 if prevalentHyp == "Yes" else 0
+diabetes = 1 if diabetes == "Yes" else 0
 
-# Split data
-X = df.drop(columns=["TenYearCHD"])
-y = df["TenYearCHD"]
+# -----------------------------
+# Prediction
+# -----------------------------
+if st.button("Predict"):
+    X = np.array([[
+        age, sex, currentSmoker, cigsPerDay, BPMeds,
+        prevalentStroke, prevalentHyp, diabetes,
+        totChol, sysBP, diaBP, BMI, heartRate, glucose
+    ]])
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+    X_scaled = scaler.transform(X)
 
-# Scale
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+    probability = model.predict_proba(X_scaled)[0][1]
+    prediction = 1 if probability >= 0.3 else 0
 
-# Train model
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
+    st.divider()
+    st.write("### Result")
+    st.write(f"Risk Probability: **{probability:.2f}**")
 
-# Evaluation
-y_pred = model.predict(X_test)
-
-st.subheader("📈 Model Performance")
-st.write("Accuracy:", accuracy_score(y_test, y_pred))
-st.text(classification_report(y_test, y_pred))
-
-# Correlation heatmap
-st.subheader("🔥 Correlation Heatmap")
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.heatmap(df.corr(), cmap="coolwarm", ax=ax)
-st.pyplot(fig)
+    if prediction == 1:
+        st.error("⚠️ High Risk of Heart Disease")
+    else:
+        st.success("✅ Low Risk of Heart Disease")
