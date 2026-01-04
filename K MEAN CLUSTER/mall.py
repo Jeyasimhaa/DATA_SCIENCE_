@@ -39,11 +39,18 @@ cluster = kmeans.predict(input_scaled)[0]
 st.subheader("📌 Prediction Result")
 st.success(f"Customer belongs to **Cluster {cluster}**")
 
-# Optional: Load dataset to visualize clusters
+# ------------------------------------
+# Optional Visualization Section
+# ------------------------------------
 st.subheader("📊 Customer Clusters Visualization")
 
-try:
-    df = pd.read_csv("Mall_Customers.csv")
+uploaded_file = st.file_uploader(
+    "Upload Mall_Customers.csv to visualize clusters",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
 
     X = df[['Annual Income (k$)', 'Spending Score (1-100)']]
     X_scaled = scaler.transform(X)
@@ -58,6 +65,7 @@ try:
             label=f'Cluster {c}'
         )
 
+    # Plot new customer
     ax.scatter(
         annual_income,
         spending_score,
@@ -73,6 +81,5 @@ try:
     ax.legend()
 
     st.pyplot(fig)
-
-except FileNotFoundError:
-    st.warning("Mall_Customers.csv not found. Upload it to visualize clusters.")
+else:
+    st.info("Upload a dataset to view cluster visualization.")
