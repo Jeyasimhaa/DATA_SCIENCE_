@@ -1,6 +1,7 @@
-# -------------------------------
-# Imports
-# -------------------------------
+# ===============================
+# Cancer Diagnosis Prediction App
+# ===============================
+
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -11,7 +12,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 
 # -------------------------------
-# Page config
+# Page Configuration
 # -------------------------------
 st.set_page_config(
     page_title="Cancer Diagnosis Prediction",
@@ -27,16 +28,15 @@ st.write("Random Forest model using patient data")
 @st.cache_resource
 def load_and_train_model():
     BASE_DIR = Path(__file__).resolve().parent
-    data_path = BASE_DIR / "cancer_data.csv"
+    data_path = BASE_DIR / "cancer_data.xlsx"
 
     if not data_path.exists():
-        st.error("❌ Dataset file 'cancer_data.xlsx' not found in the app directory.")
+        st.error("❌ File 'cancer_data.xlsx' not found in app directory.")
         st.stop()
 
-    # Read Excel file
-    df = pd.read_excel(data_path)
+    # Explicit Excel engine (fixes your error)
+    df = pd.read_excel(data_path, engine="openpyxl")
 
-    # Expecting a column named 'diagnosis'
     if "diagnosis" not in df.columns:
         st.error("❌ Dataset must contain a 'diagnosis' column.")
         st.stop()
@@ -44,7 +44,7 @@ def load_and_train_model():
     X = df.drop("diagnosis", axis=1)
     y = df["diagnosis"]
 
-    preprocessing = Pipeline(steps=[
+    preprocessing = Pipeline([
         ("imputer", SimpleImputer(strategy="mean")),
         ("scaler", StandardScaler())
     ])
@@ -55,7 +55,7 @@ def load_and_train_model():
         n_jobs=-1
     )
 
-    pipeline = Pipeline(steps=[
+    pipeline = Pipeline([
         ("preprocessing", preprocessing),
         ("model", model)
     ])
@@ -67,7 +67,7 @@ def load_and_train_model():
 model, feature_names = load_and_train_model()
 
 # -------------------------------
-# User input section
+# User Input Section
 # -------------------------------
 st.header("🔍 Enter Patient Information")
 
@@ -78,9 +78,10 @@ smoking = st.selectbox("Smoking (0 = No, 1 = Yes)", [0, 1])
 genetic_risk = st.slider("Genetic Risk (0–3)", 0, 3, 1)
 physical_activity = st.slider("Physical Activity (hours/week)", 0, 10, 4)
 alcohol_intake = st.number_input("Alcohol Intake", 0.0, 10.0, 2.0)
-cancer_history = st.selectbox("Family Cancer History (0 = No, 1 = Yes)", [0, 1])
+cancer_history = st.selectbox(
+    "Family Cancer History (0 = No, 1 = Yes)", [0, 1]
+)
 
-# Input dataframe must match training columns
 input_data = pd.DataFrame({
     "age": [age],
     "gender": [gender],
@@ -102,12 +103,18 @@ if st.button("Predict Diagnosis"):
     probability = model.predict_proba(input_data)[0][1]
 
     if prediction == 1:
-        st.error(f"⚠️ **Diagnosis: POSITIVE**\n\nProbability: **{probability:.2f}**")
+        st.error(
+            f"⚠️ **Diagnosis: POSITIVE**\n\n"
+            f"Probability: **{probability:.2f}**"
+        )
     else:
-        st.success(f"✅ **Diagnosis: NEGATIVE**\n\nProbability: **{probability:.2f}**")
+        st.success(
+            f"✅ **Diagnosis: NEGATIVE**\n\n"
+            f"Probability: **{probability:.2f}**"
+        )
 
 # -------------------------------
-# Feature importance
+# Feature Importance
 # -------------------------------
 st.subheader("📊 Feature Importance")
 
