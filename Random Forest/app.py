@@ -1,11 +1,14 @@
 import streamlit as st
 import pickle
 import numpy as np
-
+import os
 # Page configuration (MUST be first)
 st.set_page_config(page_title="Cancer Prediction App", layout="centered")
 
-# Load trained model
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "cancer_rf_model.pkl")
+
+
 with open("cancer_rf_model.pkl", "rb") as file:
     model = pickle.load(file)
 
