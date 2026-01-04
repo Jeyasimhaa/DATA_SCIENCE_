@@ -1,22 +1,45 @@
 import streamlit as st
 import pickle
 import numpy as np
+import os
 
-# Load model
-with open("decision_tree_model.pkl", "rb") as f:
-    model = pickle.load(f)
+# --------------------------------------------------
+# Page config (MUST be first Streamlit command)
+# --------------------------------------------------
+st.set_page_config(
+    page_title="Interest Prediction App",
+    layout="centered"
+)
 
-# Load label encoder
-with open("interest_label_encoder.pkl", "rb") as f:
-    le = pickle.load(f)
+# --------------------------------------------------
+# Load model & encoder safely using absolute paths
+# --------------------------------------------------
+@st.cache_resource
+def load_artifacts():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Page config
-st.set_page_config(page_title="Interest Prediction App", layout="centered")
+    model_path = os.path.join(base_dir, "decision_tree_model.pkl")
+    encoder_path = os.path.join(base_dir, "interest_label_encoder.pkl")
 
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+
+    with open(encoder_path, "rb") as f:
+        le = pickle.load(f)
+
+    return model, le
+
+model, le = load_artifacts()
+
+# --------------------------------------------------
+# App UI
+# --------------------------------------------------
 st.title("🎯 Interest Prediction using Decision Tree")
 st.write("Enter details to predict Interest")
 
+# --------------------------------------------------
 # User inputs
+# --------------------------------------------------
 age = st.number_input("Age", min_value=1, max_value=100, value=25)
 
 gender = st.selectbox(
@@ -24,12 +47,15 @@ gender = st.selectbox(
     options=["Male", "Female"]
 )
 
-# Encode gender manually (same logic as training)
+# Encoding gender (must match training)
 gender_encoded = 1 if gender == "Male" else 0
 
-# Prediction button
-if st.button("Predict Interest"):
+# --------------------------------------------------
+# Prediction
+# --------------------------------------------------
+if st.button("🔍 Predict Interest"):
     input_data = np.array([[age, gender_encoded]])
+
     prediction = model.predict(input_data)
     result = le.inverse_transform(prediction)
 
