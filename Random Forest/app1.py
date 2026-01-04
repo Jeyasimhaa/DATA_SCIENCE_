@@ -1,6 +1,9 @@
+# -------------------------------
+# Imports
+# -------------------------------
 import streamlit as st
 import pandas as pd
-import joblib
+from pathlib import Path
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -16,14 +19,21 @@ st.set_page_config(
 )
 
 st.title("🧬 Cancer Diagnosis Prediction")
-st.write("Random Forest Model using Patient Data")
+st.write("Random Forest model using patient data")
 
 # -------------------------------
 # Load dataset & train model
 # -------------------------------
-@st.cache_data
+@st.cache_resource
 def load_and_train_model():
-    df = pd.read_csv("dbf04486-979c-444d-b246-466814f7fd34.csv")
+    BASE_DIR = Path(__file__).resolve().parent
+    csv_path = BASE_DIR / "dbf04486-979c-444d-b246-466814f7fd34.csv"
+
+    if not csv_path.exists():
+        st.error("❌ Dataset file not found. Please upload or add CSV to project folder.")
+        st.stop()
+
+    df = pd.read_csv(csv_path)
 
     X = df.drop("diagnosis", axis=1)
     y = df["diagnosis"]
@@ -78,19 +88,21 @@ input_data = pd.DataFrame({
 # -------------------------------
 # Prediction
 # -------------------------------
-if st.button("🔮 Predict Diagnosis"):
+st.subheader("🔮 Prediction")
+
+if st.button("Predict Diagnosis"):
     prediction = model.predict(input_data)[0]
     probability = model.predict_proba(input_data)[0][1]
 
     if prediction == 1:
-        st.error(f"⚠️ Diagnosis: POSITIVE\n\nProbability: {probability:.2f}")
+        st.error(f"⚠️ **Diagnosis: POSITIVE**\n\nProbability: **{probability:.2f}**")
     else:
-        st.success(f"✅ Diagnosis: NEGATIVE\n\nProbability: {probability:.2f}")
+        st.success(f"✅ **Diagnosis: NEGATIVE**\n\nProbability: **{probability:.2f}**")
 
 # -------------------------------
 # Feature importance
 # -------------------------------
-st.header("📊 Feature Importance")
+st.subheader("📊 Feature Importance")
 
 importances = model.named_steps["model"].feature_importances_
 
