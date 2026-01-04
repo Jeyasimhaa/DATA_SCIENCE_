@@ -27,7 +27,7 @@ st.write("Random Forest model using patient data")
 @st.cache_resource
 def load_and_train_model():
     BASE_DIR = Path(__file__).resolve().parent
-    data_path = BASE_DIR / "cancer_data.xlsx"
+    data_path = BASE_DIR / "cancer_data.csv"
 
     if not data_path.exists():
         st.error("❌ Dataset file 'cancer_data.xlsx' not found in the app directory.")
