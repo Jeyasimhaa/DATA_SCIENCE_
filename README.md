@@ -5,6 +5,6 @@
  ** Naive Bayes Alogrithm [Here](https://datascience-cqzujmafbzh7xdxfbgbiyh.streamlit.app/)
  ** Decision Tree[Here](https://datascience-pwtjcm9ats7m6lw9j5fl95.streamlit.app/)
  ** Random Forest Classfication[Here](https://datascience-bneaqlwfdvwh3eqrcewfzw.streamlit.app/)
- ** Random Forest Regression
+ ** Random Forest Regression[here](https://datascience-bysywrplulh3xxnrtuedsr.streamlit.app/)
  ** K-Means Cluster[Here](https://datascience-l4fqhy5zpbmgt9bycan3ka.streamlit.app/)
  
