@@ -28,14 +28,14 @@ st.write("Random Forest model using patient data")
 @st.cache_resource
 def load_and_train_model():
     BASE_DIR = Path(__file__).resolve().parent
-    data_path = BASE_DIR / "cancer_data.xlsx"
+    data_path = BASE_DIR / "cancer_data.csv"
 
     if not data_path.exists():
-        st.error("❌ File 'cancer_data.xlsx' not found in app directory.")
+        st.error("❌ File 'cancer_data.csv' not found in app directory.")
         st.stop()
 
-    # Explicit Excel engine (fixes your error)
-    df = pd.read_excel(data_path, engine="openpyxl")
+    # Read CSV (most stable option)
+    df = pd.read_csv(data_path)
 
     if "diagnosis" not in df.columns:
         st.error("❌ Dataset must contain a 'diagnosis' column.")
