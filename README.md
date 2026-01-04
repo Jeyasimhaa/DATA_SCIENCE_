@@ -1,5 +1,5 @@
 ## PROJECTS ##
- ** Linear-Regression [Here](https://datascience-foav46c3bmel3kpt7pg6v6.streamlit.app/)
+ ** Linear-Regression [Here](https://datascience-foav46c3bmel3kpt7pg6v6.streamlit.app/)<br/>
  ** Logistic-Regression[Here](https://datascience-bajvfiqou9rlv8tfsyczxp.streamlit.app/)
  ** KNN [Here](https://datascience-byekhugvqknycstrpcfm2c.streamlit.app/)
  ** Naive Bayes Alogrithm [Here](https://datascience-cqzujmafbzh7xdxfbgbiyh.streamlit.app/)
