@@ -1,28 +1,35 @@
 import streamlit as st
 import pickle
 import numpy as np
+from pathlib import Path
 
-# Page configuration (MUST be first)
+# ===================== PAGE CONFIG (MUST BE FIRST) =====================
 st.set_page_config(page_title="Cancer Prediction App", layout="centered")
 
-# Load trained model
-with open("cancer_rf_model.pkl", "rb") as file:
+# ===================== PATH HANDLING =====================
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "cancer_rf_model.pkl"
+
+# ===================== LOAD MODEL =====================
+if not MODEL_PATH.exists():
+    st.error(f"❌ Model file not found: {MODEL_PATH.name}")
+    st.stop()
+
+with open(MODEL_PATH, "rb") as file:
     model = pickle.load(file)
 
+# ===================== APP UI =====================
 st.title("🩺 Cancer Prediction App")
 st.write("Enter patient feature values to predict diagnosis")
 
-# ⚠️ Enter ALL features used in training (example placeholders)
 radius_mean = st.number_input("Radius Mean", value=10.0)
 texture_mean = st.number_input("Texture Mean", value=10.0)
 perimeter_mean = st.number_input("Perimeter Mean", value=50.0)
 area_mean = st.number_input("Area Mean", value=500.0)
 smoothness_mean = st.number_input("Smoothness Mean", value=0.1)
 
-# ⚠️ Add remaining features here if your model was trained on more columns
-
 if st.button("Predict Cancer"):
-    input_data = np.array([[ 
+    input_data = np.array([[
         radius_mean,
         texture_mean,
         perimeter_mean,
