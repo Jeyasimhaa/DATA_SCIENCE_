@@ -1,12 +1,14 @@
 import streamlit as st
 import pandas as pd
 import pickle
+import os
 
-# --------------------------------------------------
-# Load model safely (works for both pipeline-only
-# pickle and dict-based pickle)
-# --------------------------------------------------
-with open("travelinsurancemodel.pkl", "rb") as f:
+# Get current directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "travelinsurancemodel.pkl")
+
+# Load model safely
+with open(MODEL_PATH, "rb") as f:
     bundle = pickle.load(f)
 
 if isinstance(bundle, dict):
