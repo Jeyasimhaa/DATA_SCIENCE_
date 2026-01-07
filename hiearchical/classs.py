@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pickle
 import numpy as np
+from pathlib import Path
 
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
@@ -14,15 +15,19 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 st.set_page_config(page_title="Hierarchical Clustering App", layout="centered")
 st.title("📊 Hierarchical Clustering (Age vs Income)")
 
-# ===================== LOAD DATA (RELATIVE PATH) =====================
-@st.cache_data
-def load_data():
-    return pd.read_excel(
-        "income (1).xlsx",
-        names=["name", "age", "income"]
-    )
+# ===================== FILE PATH (CLOUD SAFE) =====================
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "income.xlsx"
 
-df = load_data()
+# ===================== LOAD DATA =====================
+@st.cache_data
+def load_data(file_path):
+    if not file_path.exists():
+        st.error(f"❌ File not found: {file_path.name}")
+        st.stop()
+    return pd.read_excel(file_path, names=["name", "age", "income"])
+
+df = load_data(DATA_FILE)
 
 st.subheader("Dataset Preview")
 st.dataframe(df)
@@ -52,7 +57,7 @@ hc = AgglomerativeClustering(
 df["cluster"] = hc.fit_predict(X_scaled)
 
 # ===================== SAVE MODEL =====================
-with open("hierarchical_model.pkl", "wb") as f:
+with open(BASE_DIR / "hierarchical_model.pkl", "wb") as f:
     pickle.dump(hc, f)
 
 # ===================== CLUSTER VISUALIZATION =====================
@@ -73,12 +78,8 @@ st.pyplot(fig2)
 # ===================== SIDEBAR INPUT =====================
 st.sidebar.header("🔮 Assign Cluster")
 
-age_input = st.sidebar.number_input(
-    "Enter Age", min_value=1, max_value=100, value=30
-)
-income_input = st.sidebar.number_input(
-    "Enter Income", min_value=1000, max_value=200000, value=30000
-)
+age_input = st.sidebar.number_input("Enter Age", 1, 100, 30)
+income_input = st.sidebar.number_input("Enter Income", 1000, 200000, 30000)
 
 # ===================== CLUSTER ASSIGNMENT =====================
 if st.sidebar.button("Assign Cluster"):
@@ -105,4 +106,20 @@ st.dataframe(df)
 
 # ===================== CLUSTER DISTRIBUTION =====================
 st.subheader("Cluster Distribution")
-cluster_counts = df["cluster"].value_counts().sort
+st.bar_chart(df["cluster"].value_counts().sort_index())
+
+# ===================== DENDROGRAM =====================
+st.subheader("Dendrogram")
+Z = linkage(X_scaled, method="average")
+
+fig3, ax3 = plt.subplots(figsize=(8, 5))
+dendrogram(
+    Z,
+    labels=df["name"].astype(str).values,
+    leaf_rotation=90,
+    leaf_font_size=10,
+    ax=ax3
+)
+ax3.set_xlabel("Samples")
+ax3.set_ylabel("Distance")
+st.pyplot(fig3)
