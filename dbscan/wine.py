@@ -1,4 +1,3 @@
-Here's a cleaned-up and error-free version of your Streamlit app code for DBSCAN clustering on wine data. I've made sure all syntax and logic are correct, and added minor improvements for clarity and robustness:
 import streamlit as st
 import pandas as pd
 import numpy as np
