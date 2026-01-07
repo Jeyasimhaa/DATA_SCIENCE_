@@ -2,97 +2,101 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import DBSCAN
 
 # -------------------------------
 # Page Config
 # -------------------------------
-st.set_page_config(page_title="DBSCAN Clustering App", layout="centered")
+st.set_page_config(page_title="Wine DBSCAN Clustering", layout="centered")
 
-st.title("🍷 DBSCAN Wine Clustering")
-st.write("Density-Based Clustering using DBSCAN")
-
-# -------------------------------
-# Load Pickle Files
-# -------------------------------
-@st.cache_resource
-def load_models():
-    with open("scaler.pkl", "rb") as f:
-        scaler = pickle.load(f)
-
-    with open("dbscan_model.pkl", "rb") as f:
-        dbscan = pickle.load(f)
-
-    return scaler, dbscan
-
-
-scaler, dbscan = load_models()
+st.title("🍷 Wine Clustering using DBSCAN")
+st.write("Direct deployment using wine_clustering_data.csv")
 
 # -------------------------------
-# Upload Dataset
+# Load Dataset Directly
 # -------------------------------
-st.subheader("📂 Upload CSV File")
+@st.cache_data
+def load_data():
+    return pd.read_csv("wine_clustering_data.csv")
 
-uploaded_file = st.file_uploader("Upload wine_clustering_data.csv", type=["csv"])
+df = load_data()
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.write("### Dataset Preview")
-    st.dataframe(df.head())
-
-    # Select first two columns
-    X = df.iloc[:, [0, 1]].values
-
-    # Scale
-    X_scaled = scaler.transform(X)
-
-    # DBSCAN clustering
-    labels = dbscan.fit_predict(X_scaled)
-    df["Cluster"] = labels
-
-    # -------------------------------
-    # Cluster Info
-    # -------------------------------
-    st.subheader("📊 Cluster Summary")
-    st.write(df["Cluster"].value_counts())
-
-    n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-    st.success(f"Number of clusters (excluding noise): {n_clusters}")
-
-    # -------------------------------
-    # Plot Clusters
-    # -------------------------------
-    st.subheader("📈 Cluster Visualization")
-
-    fig, ax = plt.subplots(figsize=(7, 5))
-    scatter = ax.scatter(
-        X_scaled[:, 0],
-        X_scaled[:, 1],
-        c=labels,
-        cmap="viridis",
-        s=50
-    )
-    ax.set_xlabel("Feature 1 (Scaled)")
-    ax.set_ylabel("Feature 2 (Scaled)")
-    ax.set_title("DBSCAN Clustering (Noise = -1)")
-    plt.colorbar(scatter, ax=ax)
-
-    st.pyplot(fig)
+st.subheader("📊 Dataset Preview")
+st.dataframe(df.head())
 
 # -------------------------------
-# New Data Prediction
+# Select Features
 # -------------------------------
-st.subheader("🧪 Test New Data Point")
+st.subheader("🔢 Feature Selection")
 
-f1 = st.number_input("Feature 1", value=13.5)
-f2 = st.number_input("Feature 2", value=2.3)
+feature_cols = df.columns[:2]  # first two columns
+X = df[feature_cols].values
 
-if st.button("Cluster New Point"):
-    new_data = np.array([[f1, f2]])
-    new_data_scaled = scaler.transform(new_data)
+# -------------------------------
+# Scaling
+# -------------------------------
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-    # DBSCAN reclustering (important limitation)
-    new_label = dbscan.fit_predict(new_data_scaled)
+# -------------------------------
+# DBSCAN Parameters
+# -------------------------------
+st.subheader("⚙️ DBSCAN Parameters")
 
-    st.info(f"Cluster Label: {new_label[0]}")
-    st.warning("Note: DBSCAN does NOT truly predict. It reclusters data.")
+eps = st.slider("Epsilon (eps)", 0.1, 5.0, 0.5)
+min_samples = st.slider("Min Samples", 1, 20, 5)
+
+dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+labels = dbscan.fit_predict(X_scaled)
+
+df["Cluster"] = labels
+
+# -------------------------------
+# Cluster Summary
+# -------------------------------
+st.subheader("📈 Cluster Summary")
+st.write(df["Cluster"].value_counts())
+
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+st.success(f"Number of clusters (excluding noise): {n_clusters}")
+
+# -------------------------------
+# Visualization
+# -------------------------------
+st.subheader("📉 Cluster Visualization")
+
+fig, ax = plt.subplots(figsize=(7, 5))
+scatter = ax.scatter(
+    X_scaled[:, 0],
+    X_scaled[:, 1],
+    c=labels,
+    cmap="viridis",
+    s=60
+)
+ax.set_xlabel(feature_cols[0])
+ax.set_ylabel(feature_cols[1])
+ax.set_title("DBSCAN Wine Clustering (Noise = -1)")
+plt.colorbar(scatter, ax=ax)
+
+st.pyplot(fig)
+
+# -------------------------------
+# Test New Data
+# -------------------------------
+st.subheader("🧪 Test New Wine Data")
+
+f1 = st.number_input(f"{feature_cols[0]}", value=float(X[:, 0].mean()))
+f2 = st.number_input(f"{feature_cols[1]}", value=float(X[:, 1].mean()))
+
+if st.button("Test Point"):
+    new_point = np.array([[f1, f2]])
+    new_point_scaled = scaler.transform(new_point)
+
+    # DBSCAN limitation
+    new_label = dbscan.fit_predict(
+        np.vstack([X_scaled, new_point_scaled])
+    )[-1]
+
+    st.info(f"Assigned Cluster: {new_label}")
+    st.warning("DBSCAN does not truly predict — it reclusters the data.")
