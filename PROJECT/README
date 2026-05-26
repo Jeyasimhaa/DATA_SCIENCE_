@@ -1,0 +1,125 @@
+# 🚗🚌 College Bus vs Car Classifier using CNN
+
+A deep learning-based image classification project that identifies whether a vehicle is a College Bus or a Car using Convolutional Neural Networks (CNN). This project also includes advanced features such as image upload prediction, campus vehicle monitoring, and a vehicle counting system.
+
+# 📌 Project Overview
+
+This project is designed to automate vehicle identification inside a college campus using Artificial Intelligence and Deep Learning techniques. The model is trained using CNN architecture to classify images accurately between buses and cars.
+
+The system can be used for:
+
+Campus vehicle monitoring
+Smart parking systems
+Traffic management
+Automatic vehicle classification
+CCTV-based vehicle counting
+# 🎯 Features
+
+✔️ Vehicle Image Classification
+✔️ College Bus vs Car Detection
+✔️ CNN-Based Deep Learning Model
+✔️ Image Upload Prediction System
+✔️ Real-Time Prediction Support
+✔️ Vehicle Counting Feature
+✔️ Data Augmentation for Better Accuracy
+✔️ Dropout & Early Stopping to Reduce Overfitting
+✔️ User-Friendly Interface
+
+# 🧠 Technologies Used
+Python
+TensorFlow
+Keras
+CNN (Convolutional Neural Network)
+OpenCV
+NumPy
+Matplotlib
+Streamlit (for deployment)
+# 📂 Project Structure
+├── dataset/
+│   ├── bus/
+│   └── car/
+│
+├── model/
+│   └── trained_model.h5
+│
+├── app.py
+├── train.py
+├── requirements.txt
+└── README.md
+⚙️ CNN Workflow
+Image Collection
+Data Preprocessing
+Data Augmentation
+CNN Model Building
+Model Training
+Validation & Testing
+Prediction System
+Deployment using Streamlit
+🏗️ Model Architecture
+
+The CNN model includes:
+
+Convolution Layers
+MaxPooling Layers
+Dropout Layers
+Dense Layers
+ReLU Activation Function
+Sigmoid Activation Function
+
+These layers help the model learn image patterns effectively and improve prediction accuracy.
+
+# 📈 Accuracy Improvement Techniques
+
+To improve model performance, the following techniques were used:
+
+Data Augmentation
+Dropout Regularization
+Early Stopping
+Image Rescaling
+Transfer Learning (Optional)
+🚀 How to Run the Project
+1️⃣ Install Required Libraries
+pip install -r requirements.txt
+2️⃣ Run Training File
+python train.py
+3️⃣ Run Streamlit App
+streamlit run app.py
+🖼️ Prediction System
+
+The user can upload a vehicle image, and the model predicts whether the image belongs to:
+
+🚌 College Bus
+🚗 Car
+
+with prediction confidence.
+
+# 📊 Future Enhancements
+Real-time CCTV Detection
+Multi-Vehicle Classification
+Number Plate Recognition
+Live Camera Integration
+Advanced Traffic Monitoring System
+# 👨‍💻 Team Project
+
+Project Title:
+College Bus vs Car Classifier using CNN
+
+This project was developed as part of a Deep Learning and Computer Vision academic project.
+
+# 📚 Learning Outcomes
+
+Through this project, we learned:
+
+Deep Learning concepts
+CNN architecture
+Image Classification
+Model Optimization
+AI-based Monitoring Systems
+Streamlit Deployment
+# 📜 Conclusion
+
+The project successfully demonstrates how CNN models can be used for intelligent vehicle classification and campus monitoring systems. It provides an efficient and scalable solution for smart transportation management using Artificial Intelligence.
+
+# ⭐ Acknowledgment
+
+Special thanks to our mentors, faculty members, and open-source communities for their valuable support and guidance throughout the project development.

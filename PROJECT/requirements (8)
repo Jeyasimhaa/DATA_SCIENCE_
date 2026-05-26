@@ -1,0 +1,10 @@
+tensorflow
+keras
+sequential
+Dense
+streamlit
+numpy
+cv2
+os
+Dropout
+GlobalAveragePooling2D
