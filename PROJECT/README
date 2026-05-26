@@ -1,8 +1,7 @@
 #🏫 Smart Campus Vehicle Monitoring System 🚗🚍
 🎥 Smart CCTV Vehicle Counting System 
-[Click](https://datascience-9qyvfgasrfccjyyp3k8uez.streamlit.app/)
 # 🚗🚌 College Bus vs Car Classifier using CNN
-
+[Visit the App](https://datascience-9qyvfgasrfccjyyp3k8uez.streamlit.app/)
 A deep learning-based image classification project that identifies whether a vehicle is a College Bus or a Car using Convolutional Neural Networks (CNN). This project also includes advanced features such as image upload prediction, campus vehicle monitoring, and a vehicle counting system.
 
 # 📌 Project Overview
