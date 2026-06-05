@@ -4,182 +4,241 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 # ----------------------------------
-# Gemini API Configuration
-# ----------------------------------
 
-genai.configure(
-    api_key=st.secrets["GEMINI_API_KEY"]
-)
+# Page Config
 
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-# ----------------------------------
-# PDF Generator Function
-# ----------------------------------
-
-def create_pdf(report):
-
-    pdf_file = "Student_Report.pdf"
-
-    doc = SimpleDocTemplate(pdf_file)
-
-    styles = getSampleStyleSheet()
-
-    content = [
-        Paragraph(
-            report.replace("\n", "<br/>"),
-            styles["BodyText"]
-        )
-    ]
-
-    doc.build(content)
-
-    return pdf_file
-
-
-# ----------------------------------
-# Streamlit UI
 # ----------------------------------
 
 st.set_page_config(
-    page_title="AI Student Report Generator",
-    page_icon="🎓"
+page_title="AI Student Report Generator",
+page_icon="🎓"
 )
+
+# ----------------------------------
+
+# Gemini Configuration
+
+# ----------------------------------
+
+try:
+genai.configure(
+api_key=st.secrets["GEMINI_API_KEY"]
+)
+
+```
+model = genai.GenerativeModel(
+    "gemini-1.5-flash-latest"
+)
+```
+
+except Exception as e:
+st.error(f"Gemini Configuration Error: {e}")
+st.stop()
+
+# ----------------------------------
+
+# PDF Generator
+
+# ----------------------------------
+
+def create_pdf(report_text):
+
+```
+pdf_file = "Student_Report.pdf"
+
+doc = SimpleDocTemplate(pdf_file)
+
+styles = getSampleStyleSheet()
+
+content = [
+    Paragraph(
+        report_text.replace("\n", "<br/>"),
+        styles["BodyText"]
+    )
+]
+
+doc.build(content)
+
+return pdf_file
+```
+
+# ----------------------------------
+
+# UI
+
+# ----------------------------------
 
 st.title("🎓 AI Student Report Generator")
 
 st.write(
-    "Enter student marks and generate an AI-powered performance report."
+"Generate AI-powered student performance reports."
 )
 
-# Student Details
-
-name = st.text_input("Student Name")
+student_name = st.text_input(
+"Student Name"
+)
 
 maths = st.number_input(
-    "Maths Marks",
-    min_value=0,
-    max_value=100,
-    value=0
+"Maths Marks",
+min_value=0,
+max_value=100,
+value=0
 )
 
 science = st.number_input(
-    "Science Marks",
-    min_value=0,
-    max_value=100,
-    value=0
+"Science Marks",
+min_value=0,
+max_value=100,
+value=0
 )
 
 english = st.number_input(
-    "English Marks",
-    min_value=0,
-    max_value=100,
-    value=0
+"English Marks",
+min_value=0,
+max_value=100,
+value=0
 )
 
 computer = st.number_input(
-    "Computer Marks",
-    min_value=0,
-    max_value=100,
-    value=0
+"Computer Marks",
+min_value=0,
+max_value=100,
+value=0
 )
-
-# Generate Report Button
 
 if st.button("Generate Report"):
 
-    total = maths + science + english + computer
+```
+if not student_name.strip():
+    st.warning(
+        "Please enter Student Name."
+    )
+    st.stop()
 
-    percentage = total / 4
+total = (
+    maths +
+    science +
+    english +
+    computer
+)
 
-    # Grade Calculation
+percentage = total / 4
 
-    if percentage >= 90:
-        grade = "A+"
+# Grade Calculation
 
-    elif percentage >= 80:
-        grade = "A"
+if percentage >= 90:
+    grade = "A+"
 
-    elif percentage >= 70:
-        grade = "B"
+elif percentage >= 80:
+    grade = "A"
 
-    elif percentage >= 60:
-        grade = "C"
+elif percentage >= 70:
+    grade = "B"
 
-    else:
-        grade = "D"
+elif percentage >= 60:
+    grade = "C"
 
-    st.success("Report Generated Successfully!")
+else:
+    grade = "D"
 
-    st.subheader("📊 Academic Performance")
+st.success("Report Generated Successfully!")
 
-    st.write(f"**Student Name:** {name}")
-    st.write(f"**Total Marks:** {total}/400")
-    st.write(f"**Percentage:** {percentage:.2f}%")
-    st.write(f"**Grade:** {grade}")
+st.subheader("📊 Academic Performance")
 
-    # Gemini Prompt
+st.write(
+    f"**Student Name:** {student_name}"
+)
 
-    prompt = f"""
-    Student Name: {name}
+st.write(
+    f"**Total Marks:** {total}/400"
+)
 
-    Marks:
-    Maths: {maths}
-    Science: {science}
-    English: {english}
-    Computer: {computer}
+st.write(
+    f"**Percentage:** {percentage:.2f}%"
+)
 
-    Percentage: {percentage:.2f}
-    Grade: {grade}
+st.write(
+    f"**Grade:** {grade}"
+)
 
-    Generate:
+prompt = f"""
+Student Name: {student_name}
 
-    1. Performance Summary
-    2. Strengths
-    3. Areas for Improvement
-    4. Study Tips
+Marks:
+Maths: {maths}
+Science: {science}
+English: {english}
+Computer: {computer}
 
-    Keep the feedback positive, professional,
-    and motivational for students.
-    """
+Percentage: {percentage:.2f}%
 
-    # Generate AI Feedback
+Grade: {grade}
 
-    with st.spinner("Generating AI Feedback..."):
+Generate:
 
-        response = model.generate_content(prompt)
+1. Performance Summary
+
+2. Strengths
+
+3. Areas for Improvement
+
+4. Study Tips
+
+Keep the response:
+- Positive
+- Professional
+- Motivational
+- Around 150 words
+"""
+
+try:
+
+    with st.spinner(
+        "Generating AI Feedback..."
+    ):
+
+        response = model.generate_content(
+            prompt
+        )
 
         feedback = response.text
 
-    st.subheader("🤖 AI Feedback")
+except Exception as e:
 
-    st.write(feedback)
+    st.error(
+        f"Gemini Error: {e}"
+    )
 
-    # PDF Content
+    st.stop()
 
-    report = f"""
-    STUDENT REPORT
+st.subheader("🤖 AI Feedback")
 
-    Student Name: {name}
+st.write(feedback)
 
-    Total Marks: {total}/400
+report = f"""
+STUDENT REPORT
 
-    Percentage: {percentage:.2f}%
+Student Name: {student_name}
 
-    Grade: {grade}
+Total Marks: {total}/400
 
-    AI Feedback:
+Percentage: {percentage:.2f}%
 
-    {feedback}
-    """
+Grade: {grade}
 
-    pdf_file = create_pdf(report)
+AI FEEDBACK
 
-    with open(pdf_file, "rb") as file:
+{feedback}
+"""
 
-        st.download_button(
-            label="📄 Download PDF Report",
-            data=file,
-            file_name="Student_Report.pdf",
-            mime="application/pdf"
-        )
+pdf_file = create_pdf(report)
+
+with open(pdf_file, "rb") as file:
+
+    st.download_button(
+        label="📄 Download PDF Report",
+        data=file,
+        file_name="Student_Report.pdf",
+        mime="application/pdf"
+    )
+```
