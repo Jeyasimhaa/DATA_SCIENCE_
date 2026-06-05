@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -7,12 +7,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 # Gemini API Configuration
 # ----------------------------------
 
-genai.configure(
+client = genai.Client(
     api_key=st.secrets["GEMINI_API_KEY"]
 )
-st.write("Secret exists:", "GEMINI_API_KEY" in st.secrets)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
 
 # ----------------------------------
 # PDF Generator Function
@@ -37,9 +34,8 @@ def create_pdf(report):
 
     return pdf_file
 
-
 # ----------------------------------
-# Streamlit UI
+# Streamlit Page Configuration
 # ----------------------------------
 
 st.set_page_config(
@@ -53,7 +49,9 @@ st.write(
     "Enter student marks and generate an AI-powered performance report."
 )
 
+# ----------------------------------
 # Student Details
+# ----------------------------------
 
 name = st.text_input("Student Name")
 
@@ -85,28 +83,25 @@ computer = st.number_input(
     value=0
 )
 
-# Generate Report Button
+# ----------------------------------
+# Generate Report
+# ----------------------------------
 
 if st.button("Generate Report"):
 
     total = maths + science + english + computer
-
     percentage = total / 4
 
     # Grade Calculation
 
     if percentage >= 90:
         grade = "A+"
-
     elif percentage >= 80:
         grade = "A"
-
     elif percentage >= 70:
         grade = "B"
-
     elif percentage >= 60:
         grade = "C"
-
     else:
         grade = "D"
 
@@ -119,7 +114,9 @@ if st.button("Generate Report"):
     st.write(f"**Percentage:** {percentage:.2f}%")
     st.write(f"**Grade:** {grade}")
 
-    # Gemini Prompt
+    # ----------------------------------
+    # AI Prompt
+    # ----------------------------------
 
     prompt = f"""
     Student Name: {name}
@@ -130,7 +127,7 @@ if st.button("Generate Report"):
     English: {english}
     Computer: {computer}
 
-    Percentage: {percentage:.2f}
+    Percentage: {percentage:.2f}%
     Grade: {grade}
 
     Generate:
@@ -144,19 +141,33 @@ if st.button("Generate Report"):
     and motivational for students.
     """
 
+    # ----------------------------------
     # Generate AI Feedback
+    # ----------------------------------
 
     with st.spinner("Generating AI Feedback..."):
 
-        response = model.generate_content(prompt)
+        try:
 
-        feedback = response.text
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+
+            feedback = response.text
+
+        except Exception as e:
+
+            st.error(f"Gemini Error: {e}")
+            st.stop()
 
     st.subheader("🤖 AI Feedback")
 
     st.write(feedback)
 
+    # ----------------------------------
     # PDF Content
+    # ----------------------------------
 
     report = f"""
     STUDENT REPORT
