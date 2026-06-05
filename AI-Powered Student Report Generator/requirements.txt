@@ -1,4 +1,8 @@
 streamlit
-google-generativeai
-reportlab
-pandas
+ultralytics
+numpy
+opencv-python-headless
+Pillow
+torch
+torchvision
+lapx
