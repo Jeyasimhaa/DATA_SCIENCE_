@@ -10,6 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 genai.configure(
     api_key=st.secrets["GEMINI_API_KEY"]
 )
+st.write("Secret exists:", "GEMINI_API_KEY" in st.secrets)
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
