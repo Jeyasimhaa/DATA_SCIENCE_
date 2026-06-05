@@ -1,41 +1,34 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
-# ----------------------------------
-# Streamlit Config
-# ----------------------------------
-
+# -----------------------------
+# Page Config
+# -----------------------------
 st.set_page_config(
     page_title="AI Student Report Generator",
     page_icon="🎓"
 )
 
-# ----------------------------------
-# Gemini Configuration
-# ----------------------------------
-
+# -----------------------------
+# Gemini Client
+# -----------------------------
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
-
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
+    client = genai.Client(
+        api_key=st.secrets["GEMINI_API_KEY"]
+    )
 except Exception as e:
     st.error(f"Gemini Setup Error: {e}")
     st.stop()
 
-# ----------------------------------
-# PDF Generator
-# ----------------------------------
-
+# -----------------------------
+# PDF Function
+# -----------------------------
 def create_pdf(report_text):
     pdf_file = "Student_Report.pdf"
 
     doc = SimpleDocTemplate(pdf_file)
-
     styles = getSampleStyleSheet()
 
     story = [
@@ -49,10 +42,9 @@ def create_pdf(report_text):
 
     return pdf_file
 
-# ----------------------------------
+# -----------------------------
 # UI
-# ----------------------------------
-
+# -----------------------------
 st.title("🎓 AI Student Report Generator")
 
 st.write(
@@ -89,14 +81,13 @@ computer = st.number_input(
     value=0
 )
 
-# ----------------------------------
+# -----------------------------
 # Generate Report
-# ----------------------------------
-
+# -----------------------------
 if st.button("Generate Report"):
 
     if not name.strip():
-        st.warning("Please enter a student name.")
+        st.warning("Please enter student name.")
         st.stop()
 
     total = maths + science + english + computer
@@ -135,41 +126,29 @@ if st.button("Generate Report"):
     Grade: {grade}
 
     Generate:
-
     1. Performance Summary
     2. Strengths
     3. Areas for Improvement
     4. Study Tips
 
-    Keep the feedback positive,
-    professional and motivational.
+    Keep feedback positive, professional and motivational.
     """
 
     with st.spinner("Generating AI Feedback..."):
 
         try:
-
-            response = model.generate_content(prompt)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
 
             feedback = response.text
 
         except Exception as e:
-
-            st.error("Gemini API Error")
-            st.code(str(e))
-
-            st.write("Secret Loaded:", "GEMINI_API_KEY" in st.secrets)
-
-            if "GEMINI_API_KEY" in st.secrets:
-                st.write(
-                    "Key Prefix:",
-                    st.secrets["GEMINI_API_KEY"][:10]
-                )
-
+            st.error(f"Gemini Error: {e}")
             st.stop()
 
     st.subheader("🤖 AI Feedback")
-
     st.write(feedback)
 
     report = f"""
@@ -191,7 +170,6 @@ if st.button("Generate Report"):
     pdf_file = create_pdf(report)
 
     with open(pdf_file, "rb") as file:
-
         st.download_button(
             label="📄 Download PDF Report",
             data=file,
