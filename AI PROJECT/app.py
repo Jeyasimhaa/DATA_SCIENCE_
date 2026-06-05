@@ -4,17 +4,17 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 import base64
 
-# -----------------------------
+# -------------------------
 # OpenAI Client
-# -----------------------------
+# -------------------------
 client = OpenAI(
-    api_key="AQ.Ab8RN6KAKgIPfMnrDg0HEttqKkQQN7ge7f8qR-GjclNJs9P4WQ"
+    api_key=st.secrets["OPENAI_API_KEY"]
 )
 
-# -----------------------------
-# PDF Generator Function
-# -----------------------------
-def create_pdf(story_text):
+# -------------------------
+# PDF Generator
+# -------------------------
+def create_pdf(story):
 
     pdf_file = "AI_Story.pdf"
 
@@ -24,17 +24,19 @@ def create_pdf(story_text):
 
     content = [
         Paragraph("AI Story Creator", styles['Title']),
-        Paragraph(story_text, styles['BodyText'])
+        Paragraph(
+            story.replace("\n", "<br/>"),
+            styles['BodyText']
+        )
     ]
 
     doc.build(content)
 
     return pdf_file
 
-
-# -----------------------------
+# -------------------------
 # Streamlit UI
-# -----------------------------
+# -------------------------
 st.set_page_config(
     page_title="AI Story Creator",
     page_icon="📖"
@@ -53,12 +55,12 @@ prompt = st.text_area(
 
 if st.button("Generate Story"):
 
-    # -----------------------------
-    # Story Generation
-    # -----------------------------
+    # -------------------------
+    # Story + Character Creation
+    # -------------------------
     with st.spinner("Generating Story..."):
 
-        story_response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
                 {
@@ -67,8 +69,12 @@ if st.button("Generate Story"):
                     Create:
 
                     1. Story Title
+
                     2. Main Characters
+                    (Name, Role, Personality)
+
                     3. Short Children's Story
+                    (300-400 words)
 
                     Prompt:
                     {prompt}
@@ -77,17 +83,17 @@ if st.button("Generate Story"):
             ]
         )
 
-        story = story_response.choices[0].message.content
+        story = response.choices[0].message.content
 
-    st.success("Story Generated Successfully!")
+    st.success("Story Generated!")
 
-    st.subheader("📚 Generated Story")
+    st.subheader("📚 Story")
     st.write(story)
 
-    # -----------------------------
+    # -------------------------
     # Image Generation
-    # -----------------------------
-    with st.spinner("Generating Story Image..."):
+    # -------------------------
+    with st.spinner("Generating Illustration..."):
 
         image_response = client.images.generate(
             model="gpt-image-1",
@@ -97,23 +103,26 @@ if st.button("Generate Story"):
 
         image_base64 = image_response.data[0].b64_json
 
-        image_bytes = base64.b64decode(image_base64)
-
-        st.subheader("🎨 Story Illustration")
-        st.image(
-            image_bytes,
-            caption="AI Generated Story Image"
+        image_bytes = base64.b64decode(
+            image_base64
         )
 
-    # -----------------------------
+        st.subheader("🎨 Story Illustration")
+
+        st.image(
+            image_bytes,
+            use_container_width=True
+        )
+
+    # -------------------------
     # PDF Export
-    # -----------------------------
+    # -------------------------
     pdf_file = create_pdf(story)
 
     with open(pdf_file, "rb") as file:
 
         st.download_button(
-            label="📄 Download Story PDF",
+            label="📄 Download PDF",
             data=file,
             file_name="AI_Story.pdf",
             mime="application/pdf"
