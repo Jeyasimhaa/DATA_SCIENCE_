@@ -1,41 +1,10 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 # ----------------------------------
-# Gemini API Configuration
-# ----------------------------------
-
-client = genai.Client(
-    api_key=st.secrets["GEMINI_API_KEY"]
-)
-
-# ----------------------------------
-# PDF Generator Function
-# ----------------------------------
-
-def create_pdf(report):
-
-    pdf_file = "Student_Report.pdf"
-
-    doc = SimpleDocTemplate(pdf_file)
-
-    styles = getSampleStyleSheet()
-
-    content = [
-        Paragraph(
-            report.replace("\n", "<br/>"),
-            styles["BodyText"]
-        )
-    ]
-
-    doc.build(content)
-
-    return pdf_file
-
-# ----------------------------------
-# Streamlit Page Configuration
+# Streamlit Config
 # ----------------------------------
 
 st.set_page_config(
@@ -43,15 +12,52 @@ st.set_page_config(
     page_icon="🎓"
 )
 
+# ----------------------------------
+# Gemini Configuration
+# ----------------------------------
+
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+
+    genai.configure(api_key=api_key)
+
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+except Exception as e:
+    st.error(f"Gemini Setup Error: {e}")
+    st.stop()
+
+# ----------------------------------
+# PDF Generator
+# ----------------------------------
+
+def create_pdf(report_text):
+    pdf_file = "Student_Report.pdf"
+
+    doc = SimpleDocTemplate(pdf_file)
+
+    styles = getSampleStyleSheet()
+
+    story = [
+        Paragraph(
+            report_text.replace("\n", "<br/>"),
+            styles["BodyText"]
+        )
+    ]
+
+    doc.build(story)
+
+    return pdf_file
+
+# ----------------------------------
+# UI
+# ----------------------------------
+
 st.title("🎓 AI Student Report Generator")
 
 st.write(
     "Enter student marks and generate an AI-powered performance report."
 )
-
-# ----------------------------------
-# Student Details
-# ----------------------------------
 
 name = st.text_input("Student Name")
 
@@ -89,10 +95,12 @@ computer = st.number_input(
 
 if st.button("Generate Report"):
 
+    if not name.strip():
+        st.warning("Please enter a student name.")
+        st.stop()
+
     total = maths + science + english + computer
     percentage = total / 4
-
-    # Grade Calculation
 
     if percentage >= 90:
         grade = "A+"
@@ -114,10 +122,6 @@ if st.button("Generate Report"):
     st.write(f"**Percentage:** {percentage:.2f}%")
     st.write(f"**Grade:** {grade}")
 
-    # ----------------------------------
-    # AI Prompt
-    # ----------------------------------
-
     prompt = f"""
     Student Name: {name}
 
@@ -137,37 +141,36 @@ if st.button("Generate Report"):
     3. Areas for Improvement
     4. Study Tips
 
-    Keep the feedback positive, professional,
-    and motivational for students.
+    Keep the feedback positive,
+    professional and motivational.
     """
-
-    # ----------------------------------
-    # Generate AI Feedback
-    # ----------------------------------
 
     with st.spinner("Generating AI Feedback..."):
 
         try:
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
+            response = model.generate_content(prompt)
 
             feedback = response.text
 
         except Exception as e:
 
-            st.error(f"Gemini Error: {e}")
+            st.error("Gemini API Error")
+            st.code(str(e))
+
+            st.write("Secret Loaded:", "GEMINI_API_KEY" in st.secrets)
+
+            if "GEMINI_API_KEY" in st.secrets:
+                st.write(
+                    "Key Prefix:",
+                    st.secrets["GEMINI_API_KEY"][:10]
+                )
+
             st.stop()
 
     st.subheader("🤖 AI Feedback")
 
     st.write(feedback)
-
-    # ----------------------------------
-    # PDF Content
-    # ----------------------------------
 
     report = f"""
     STUDENT REPORT
